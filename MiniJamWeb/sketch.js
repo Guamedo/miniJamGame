@@ -10,7 +10,7 @@ let enemySpawn;
 let nav;
 
 function preload(){
-    level_string = loadStrings("levels/map1.txt");
+    level_string = loadStrings("levels/map0.txt");
 }
 
 function setup() {
@@ -21,7 +21,7 @@ function setup() {
     ui = new UI(20, 15);
     player = new Player(width/2, height/2, 40);
     enemySpawn = new EnemySpawn();
-    enemies.push(new Enemy(200, 200, 40));
+    //enemies.push(new Enemy(200, 200, 40));
     //enemies.push(new Enemy(500, 200, 40));
     nav = new Navigator();
 }
@@ -48,7 +48,7 @@ function draw() {
     //let path = nav.findPath(enemies[0].pos, player.pos, level);
 
     // Spawn new enemies
-    // enemySpawn.update(dt, enemies, player);
+    enemySpawn.update(dt, enemies, player);
 
     // Update player
     player.update(dt, level, enemies, keys);

@@ -8,7 +8,7 @@ class Enemy{
         this.lookDir = p5.Vector.fromAngle(random(2.0*Math.PI));
         this.initTime = 0.8;
         this.path = [];
-        this.drawPath = true;
+        this.drawPath = false;
     }
 
     die(){
