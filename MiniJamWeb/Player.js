@@ -6,7 +6,7 @@ class Player{
         this.size = size;
         this.deadSeed = round(random(10000000));
         this.damageTimer = -1;
-        this.life = 1000;
+        this.life = 3;
         this.fireRate = 0.5;
         this.fireTimeout = 0.0;
         this.particleSystem = null;
