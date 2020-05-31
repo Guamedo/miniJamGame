@@ -23,7 +23,7 @@ function setup() {
     ui = new UI(20, 20);
     player = new Player(width/2, height/2, 40);
     enemySpawn = new EnemySpawn();
-    enemies.push(new Enemy(200, 200, 40));
+    //enemies.push(new Enemy(200, 200, 40));
     //enemies.push(new Enemy(500, 200, 40));
     nav = new Navigator();
 }
