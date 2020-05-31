@@ -8,20 +8,22 @@ let ui;
 let enemySpawn;
 
 let nav;
+let sc;
 
 function preload(){
     level_string = loadStrings("levels/map0.txt");
 }
 
 function setup() {
-    createCanvas(1200, 800);
+    sc = Math.min(windowHeight/800, 1);
+    createCanvas(1200*sc, 800*sc);
     noCursor();
 
     level = new Level(level_string);
-    ui = new UI(20, 15);
+    ui = new UI(20, 20);
     player = new Player(width/2, height/2, 40);
     enemySpawn = new EnemySpawn();
-    //enemies.push(new Enemy(200, 200, 40));
+    enemies.push(new Enemy(200, 200, 40));
     //enemies.push(new Enemy(500, 200, 40));
     nav = new Navigator();
 }
@@ -31,13 +33,15 @@ function draw() {
 
     // Manage key and mouse inputs
     player.processInput(keys);
+    player.flash = false;
     if(mouseIsPressed){
         if(mouseButton === LEFT && player.life > 0 && player.fireTimeout <= 0){
             //console.log("PAÑUM PAÑUM");
-            let v = createVector(mouseX, mouseY).sub(player.pos);
-            v.normalize();
-            v.mult(600.);
-            bullets.push(new Bullet(player.pos.x, player.pos.y, v.copy()));
+            //let v = createVector(mouseX, mouseY).sub(player.pos);
+            //v.normalize();
+            //v.mult(600.);
+            //bullets.push(new Bullet(player.pos.x, player.pos.y, v.copy()));
+            player.flash = true;
             player.fireTimeout = player.fireRate;
         }
     }
@@ -52,6 +56,11 @@ function draw() {
 
     // Update player
     player.update(dt, level, enemies, keys);
+    if(player.life <= 0){
+        for(let i = 0; i < enemies.length; i++){
+            enemies[i].die();
+        }
+    }
 
     // Update enemies
     for(let i = 0; i < enemies.length; i++){
@@ -63,7 +72,7 @@ function draw() {
 
     // Remove dead enemies
     for(let i = 0; i < enemies.length; i++){
-        if(enemies[i].dead){
+        if(enemies[i].dead && enemies[i].endTimer <= 0.0){
             enemySpawn.spawnFrec = Math.max(0.5, enemySpawn.spawnFrec-0.005);
             console.log(enemySpawn.spawnFrec);
             player.points +=100;

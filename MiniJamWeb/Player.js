@@ -3,7 +3,7 @@ class Player{
         this.pos = createVector(x, y);
         this.vel = createVector(0, 0);
         this.acc = createVector(0, 0);
-        this.size = size;
+        this.size = Math.ceil(size*sc);
         this.deadSeed = round(random(10000000));
         this.damageTimer = -1;
         this.life = 3;
@@ -11,11 +11,23 @@ class Player{
         this.fireTimeout = 0.0;
         this.particleSystem = null;
         this.points = 0;
+        this.range = 150;
+        this.amp = Math.PI/4;
+        this.flash = false;
     }
 
     draw(){
         push();
-        if(this.life > 0){
+        if(this.damageTimer <= 0.0){
+            fill(200, 50, 50);
+        }else{
+            fill(200, 50, 50, 255*((Math.sin(40.0*this.damageTimer)+1)/2.0));
+        }
+
+        noStroke();
+        rectMode(CENTER);
+        rect(this.pos.x, this.pos.y, this.size,this.size);
+        /*if(this.life > 0){
             if(this.damageTimer <= 0.0){
                 fill(200, 50, 50);
             }else{
@@ -27,7 +39,7 @@ class Player{
             rect(this.pos.x, this.pos.y, this.size,this.size);
         }else{
             this.particleSystem.draw();
-        }
+        }*/
         pop();
     }
 
@@ -53,7 +65,16 @@ class Player{
 
             this.pos.add(p5.Vector.mult(this.vel, dt));
 
-            enemies.forEach(e => this.collideBox(e.pos, e.size));
+
+            for(let i = 0; i < enemies.length; i++){
+                if(!enemies[i].dead) {
+                    this.collideBox(enemies[i].pos, enemies[i].size);
+                    if (this.arcToCircleIntersection(enemies[i]) && this.flash) {
+                        enemies[i].die();
+                    }
+                }
+            }
+            //enemies.forEach(e => this.collideBox(e.pos, e.size));
             if(this.life <= 0){
                 this.particleSystem = new ParticleSystem(this.pos.x,
                                                             this.pos.y,
@@ -74,6 +95,68 @@ class Player{
         }else{
             this.particleSystem.update(dt);
         }
+    }
+
+    lineCircleIntersection(x1, y1, x2, y2, r){
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+        let dr = Math.sqrt(dx**2 + dy**2);
+        let D = x1*y2 - x2*y1;
+
+        let coll = r**2 * dr**2 - D**2;
+
+        return coll >= 0;
+    }
+
+    arcToCircleIntersection(enemy){
+        let d = enemy.pos.dist(this.pos)
+        if(d < this.range+enemy.size/2){
+            let pLook = (createVector(mouseX, mouseY).sub(this.pos)).normalize();
+            let facingAngle = Math.atan2(pLook.y, pLook.x);
+            if(d < this.range-enemy.size/2){
+                let p2e = (p5.Vector.sub(enemy.pos, this.pos)).normalize();
+                let angleOfTarget = Math.atan2(p2e.y, p2e.x);
+                let anglediff = (facingAngle - angleOfTarget + 180 + 360) % 360 - 180
+
+                if (anglediff <= this.amp/2 && anglediff >= -this.amp/2){
+                    return true;
+                }else{
+                    if(this.lineCircleIntersection(this.pos.x-enemy.pos.x, this.pos.y-enemy.pos.y,
+                        this.pos.x-enemy.pos.x + Math.cos(facingAngle+this.amp/2)*this.range,
+                        this.pos.y-enemy.pos.y + Math.sin(facingAngle+this.amp/2)*this.range,
+                        enemy.size/2)){
+                        return true;
+                    }
+                    if(this.lineCircleIntersection(this.pos.x-enemy.pos.x, this.pos.y-enemy.pos.y,
+                        this.pos.x-enemy.pos.x + Math.cos(facingAngle-this.amp/2),
+                        this.pos.y-enemy.pos.y + Math.sin(facingAngle-this.amp/2),
+                        enemy.size/2)){
+                        return true;
+                    }
+                }
+            }
+            let a = (this.range**2 - (enemy.size/2)**2 + d**2)/(2*d);
+            let h = Math.sqrt(this.range**2 - a**2);
+
+            let P2 = (this.pos.copy()).add(p5.Vector.sub(enemy.pos, this.pos).mult(a/d))
+
+            let p1 = createVector(P2.x + (h*(enemy.pos.y - this.pos.y))/d, P2.y - (h*(enemy.pos.x - this.pos.x))/d);
+            let p2 = createVector(P2.x - (h*(enemy.pos.y - this.pos.y))/d, P2.y + (h*(enemy.pos.x - this.pos.x))/d);
+
+            let p2p1 = (p5.Vector.sub(p1, this.pos)).normalize();;
+            let p2p2 = (p5.Vector.sub(p2, this.pos)).normalize();;
+
+            let angleOfTarget1 = Math.atan2(p2p1.y, p2p1.x);
+            let angleOfTarget2 = Math.atan2(p2p2.y, p2p2.x);
+
+            let anglediff1 = (facingAngle - angleOfTarget1 + 180 + 360) % 360 - 180
+            let anglediff2 = (facingAngle - angleOfTarget2 + 180 + 360) % 360 - 180
+
+            if (anglediff1 <= this.amp/2 && anglediff1 >= -this.amp/2 || anglediff2 <= this.amp/2 && anglediff2 >= -this.amp/2){
+                return true;
+            }
+        }
+        return false;
     }
 
     collideEdges(){

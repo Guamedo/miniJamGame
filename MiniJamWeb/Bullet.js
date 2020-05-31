@@ -3,7 +3,7 @@ class Bullet{
         this.pos = createVector(x, y);
         this.vel = dir;
         this.acc = createVector(0, 0);
-        this.size = 10;
+        this.size = Math.ceil(10*sc);
         this.end = false;
     }
 

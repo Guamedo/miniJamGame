@@ -23,6 +23,7 @@ class EnemySpawn{
             this.spawnTimer = this.spawnFrec;
             let newEnemyPos = this.getRandomSpawnPoint();
             enemies.push(new Enemy(newEnemyPos.x, newEnemyPos.y, 40));
+            player.points++;
             //this.spawnFrec = Math.max(0.5, this.spawnFrec-0.01);
             //console.log(this.spawnFrec);
         }

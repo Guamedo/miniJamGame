@@ -95,11 +95,11 @@ class Navigator{
         }
         path.push(startPos0.copy());
 
-        if(openSet.length === 0 && !found) {
+        /*if(openSet.length === 0 && !found) {
             console.log("Failed to find a way to the goal");
         } else {
             console.log("Found the way to the goal");
-        }
+        }*/
 
         return path;
     }
