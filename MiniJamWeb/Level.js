@@ -4,7 +4,7 @@ class Level{
         this.tiles = level;
     }
 
-    draw(sc){
+    draw(){
         push();
         for(let y = 0; y < this.tiles.length; y++){
             for(let x = 0; x < this.tiles[0].length; x++){

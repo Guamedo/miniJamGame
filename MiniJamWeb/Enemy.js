@@ -38,7 +38,7 @@ class Enemy{
         noStroke();
         rectMode(CENTER);
         if(this.dead){
-            console.log("OOK")
+            //console.log("OOK")
             ellipse(this.pos.x, this.pos.y, this.size, this.size*(this.endTimer/0.2));
         }else{
             ellipse(this.pos.x, this.pos.y, this.size, this.size*(1-this.initTime));

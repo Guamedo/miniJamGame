@@ -11,7 +11,7 @@ class Player{
         this.fireTimeout = 0.0;
         this.particleSystem = null;
         this.points = 0;
-        this.range = 150;
+        this.range = 150*sc;
         this.amp = Math.PI/4;
         this.flash = false;
     }
@@ -65,7 +65,6 @@ class Player{
 
             this.pos.add(p5.Vector.mult(this.vel, dt));
 
-
             for(let i = 0; i < enemies.length; i++){
                 if(!enemies[i].dead) {
                     this.collideBox(enemies[i].pos, enemies[i].size);
@@ -92,8 +91,6 @@ class Player{
             this.acc.set(0.0, 0.0);
 
             this.fireTimeout = Math.max(0.0, this.fireTimeout-dt);
-        }else{
-            this.particleSystem.update(dt);
         }
     }
 

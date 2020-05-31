@@ -10,12 +10,14 @@ let enemySpawn;
 let nav;
 let sc;
 
+let STATE = 2;
+
 function preload(){
     level_string = loadStrings("levels/map0.txt");
 }
 
 function setup() {
-    sc = Math.min(windowHeight/800, 1);
+    sc = Math.min((windowHeight-10)/800, 1);
     createCanvas(1200*sc, 800*sc);
     noCursor();
 
@@ -31,61 +33,74 @@ function setup() {
 function draw() {
     let dt = deltaTime/1000.0;
 
-    // Manage key and mouse inputs
-    player.processInput(keys);
-    player.flash = false;
-    if(mouseIsPressed){
-        if(mouseButton === LEFT && player.life > 0 && player.fireTimeout <= 0){
-            //console.log("PAÑUM PAÑUM");
-            //let v = createVector(mouseX, mouseY).sub(player.pos);
-            //v.normalize();
-            //v.mult(600.);
-            //bullets.push(new Bullet(player.pos.x, player.pos.y, v.copy()));
-            player.flash = true;
-            player.fireTimeout = player.fireRate;
+    if(STATE === 0){
+        // Manage key and mouse inputs
+        player.processInput(keys);
+        player.flash = false;
+        if(mouseIsPressed){
+            if(mouseButton === LEFT && player.life > 0 && player.fireTimeout <= 0){
+                player.flash = true;
+                player.fireTimeout = player.fireRate;
+            }
         }
-    }
 
-    /*********
-    * UPDATE *
-    **********/
-    //let path = nav.findPath(enemies[0].pos, player.pos, level);
+        /*********
+         * UPDATE *
+         **********/
+        //let path = nav.findPath(enemies[0].pos, player.pos, level);
 
-    // Spawn new enemies
-    enemySpawn.update(dt, enemies, player);
+        // Spawn new enemies
+        enemySpawn.update(dt, enemies, player);
 
-    // Update player
-    player.update(dt, level, enemies, keys);
-    if(player.life <= 0){
+        // Update player
+        player.update(dt, level, enemies, keys);
+        if(player.life <= 0){
+            for(let i = 0; i < enemies.length; i++){
+                enemies[i].die();
+            }
+        }
+        if(player.life <= 0){
+            let end = true;
+            for(let i = 0; i < enemies.length; i++){
+                if(enemies[i].endTimer > 0.0){
+                    end = false;
+                }
+            }
+            if(end){
+                //console.log("END");
+                STATE = 1;
+            }
+        }
+
+        // Update enemies
         for(let i = 0; i < enemies.length; i++){
-            enemies[i].die();
+            enemies[i].update(dt, level, player, enemies, i, nav);
         }
-    }
 
-    // Update enemies
-    for(let i = 0; i < enemies.length; i++){
-        enemies[i].update(dt, level, player, enemies, i, nav);
-    }
+        // Update bullets
+        bullets.forEach(b => b.update(dt, level, enemies));
 
-    // Update bullets
-    bullets.forEach(b => b.update(dt, level, enemies));
-
-    // Remove dead enemies
-    for(let i = 0; i < enemies.length; i++){
-        if(enemies[i].dead && enemies[i].endTimer <= 0.0){
-            enemySpawn.spawnFrec = Math.max(0.5, enemySpawn.spawnFrec-0.005);
-            console.log(enemySpawn.spawnFrec);
-            player.points +=100;
-            enemies.splice(i, 1);
-            i--;
+        // Remove dead enemies
+        for(let i = 0; i < enemies.length; i++){
+            if(enemies[i].dead && enemies[i].endTimer <= 0.0){
+                enemySpawn.spawnFrec = Math.max(0.5, enemySpawn.spawnFrec-0.005);
+                //console.log(enemySpawn.spawnFrec);
+                player.points +=100;
+                enemies.splice(i, 1);
+                i--;
+            }
         }
-    }
-    // Remove bullets
-    for(let i = 0; i < bullets.length; i++){
-        if(bullets[i].end) {
-            bullets.splice(i, 1);
-            i--;
+        // Remove bullets
+        for(let i = 0; i < bullets.length; i++){
+            if(bullets[i].end) {
+                bullets.splice(i, 1);
+                i--;
+            }
         }
+    }else if(STATE === 1){
+        ui.updateButton(createVector(mouseX, mouseY));
+    }else if(STATE === 2){
+        ui.updateButton(createVector(mouseX, mouseY));
     }
 
     /********
@@ -93,15 +108,25 @@ function draw() {
      ********/
 
     background(0);
-    //nav.drawPath(path);
     enemies.forEach(e => e.draw());
     bullets.forEach(b => b.draw());
     player.draw();
 
     level.draw();
-    ui.draw(player, createVector(mouseX, mouseY));
+    ui.draw(player, createVector(mouseX, mouseY), STATE);
 
 
+}
+
+function mousePressed() {
+    if(ui.inButton && mouseButton === LEFT && (STATE === 1 || STATE === 2)){
+        enemies = [];
+        enemySpawn.spawnFrec = 1.0;
+        player.life = 3;
+        STATE = 0;
+        player.points = 0;
+        player.damageTimer = -1;
+    }
 }
 
 function keyPressed(){
