@@ -16,8 +16,8 @@ let cam_shot;
 let grr_sound;
 
 function preload(){
-    cam_shot = loadSound('sounds/camera.mp3');
-    grr_sound = loadSound('sounds/gruñido2.mp3')
+    cam_shot = loadSound('sounds/camera.wav');
+    grr_sound = loadSound('sounds/grr2.wav');
     level_string = loadStrings("levels/map0.txt");
 }
 
