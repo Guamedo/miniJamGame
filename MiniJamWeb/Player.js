@@ -185,6 +185,7 @@ class Player{
             if(this.damageTimer <= 0){
                 this.damageTimer = 1.0;
                 this.life--;
+                grr_sound.play();
             }
         }
     }

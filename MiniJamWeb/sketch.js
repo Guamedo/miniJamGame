@@ -12,7 +12,12 @@ let sc;
 
 let STATE = 2;
 
+let cam_shot;
+let grr_sound;
+
 function preload(){
+    cam_shot = loadSound('sounds/camera.mp3');
+    grr_sound = loadSound('sounds/gruñido2.mp3')
     level_string = loadStrings("levels/map0.txt");
 }
 
@@ -39,6 +44,7 @@ function draw() {
         player.flash = false;
         if(mouseIsPressed){
             if(mouseButton === LEFT && player.life > 0 && player.fireTimeout <= 0){
+                cam_shot.play();
                 player.flash = true;
                 player.fireTimeout = player.fireRate;
             }
